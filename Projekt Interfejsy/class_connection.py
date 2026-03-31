@@ -8,6 +8,8 @@ class SerialInterface:
     def __init__(self):
         self.connection = serial.Serial() #uchwyt do obsugi rs232
         self.port_name = self.auto_select_rs232_prolific()
+        self.active_terminator = ""
+        self.connection.timeout = 2  # jak po 2 sekundach nic sie nie stanie to program sie nie zawiesi
 
     #zadanie 1.1 Wybór portu (połączony ze sprawdzeniem obecności portu)
 
@@ -47,7 +49,7 @@ class SerialInterface:
                     print(f"\n {'-' * 10}Próba podłączenia....{'-' * 10}")
                     if self.connection.is_open:
                         print(f"Port {p.device} z r232 poprawnie podlaczony ")
-                        self.connection.close()
+                        #self.connection.close()
                         return p.device # zwracamy nazwę  portu
 
                 except Exception as e:
@@ -133,3 +135,30 @@ class SerialInterface:
             self.active_terminator = term.value
         print(f"[1.5] Terminator ustawiony na: {repr(self.active_terminator)}")
 
+    #zadanie 2
+    # Nadawanie - OB
+    def send_message(self, text: str):
+
+        if self.connection.is_open:
+            # 1. Doklejamy wybrany w 1.5 terminator
+            full_message = text + self.active_terminator
+
+            # 2. Zamieniamy tekst na bajty (UTF-8) i wysyłamy
+            self.connection.write(full_message.encode('utf-8'))
+            print(f"[2.1] Wysłano: {repr(full_message)}")
+
+    #zadanie 3
+    # Odbiór - OB
+    def receive_message(self):
+        """Zadanie 2.2: Odbiera dane aż do napotkania terminatora."""
+        if self.connection.is_open:
+            # Czekamy na dane, aż pojawi się nasz terminator
+            # timeout w __init__ zapobiegnie zawieszeniu programu
+            raw_data = self.connection.read_until(self.active_terminator.encode('utf-8'))
+
+
+            if raw_data:
+                decoded_msg = raw_data.decode('utf-8')
+                print(f"[2.2] Odebrano: {repr(decoded_msg)}")
+                return decoded_msg
+        return None
