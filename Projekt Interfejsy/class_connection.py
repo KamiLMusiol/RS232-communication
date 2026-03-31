@@ -5,12 +5,23 @@ from enums import Parity, FlowControl, Terminator
 
 class SerialInterface:
 
+
+
+
+
     def __init__(self):
         self.connection = serial.Serial() #uchwyt do obsugi rs232
         self.port_name = self.auto_select_rs232_prolific()
         self.active_terminator = ""
         self.connection.timeout = 2  # jak po 2 sekundach nic sie nie stanie to program sie nie zawiesi
 
+
+
+    def close(self):
+        """Zamyka połączenie z portem zwalnia go"""
+        if self.connection.is_open:
+            self.connection.close()
+            print("Port został zamknięty.")
     #zadanie 1.1 Wybór portu (połączony ze sprawdzeniem obecności portu)
 
     #funckja sprawdzająca używane porty - extra
