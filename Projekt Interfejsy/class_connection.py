@@ -173,3 +173,33 @@ class SerialInterface:
                 print(f"[2.2] Odebrano: {repr(decoded_msg)}")
                 return decoded_msg
         return None
+
+    # zad 6 Tryby transmisji:
+    # 6.1  6.1. Tekstowy - OB Nadawanie:Wprowadzanie znaków alfanumerycznych do bufora transmisyjnego połączone z ich
+    # prezentacją w oknie „Nadawanie” i możliwością edycji. Po wydaniu komendy „wyślij” wysłanie bufora na łącze z dopisaniem na końcu terminator
+    # Odbiór: Prezentacja odebranych znaków alfanumerycznych w oknie „Odbiór”.
+
+    def send_file(self, file_path):
+        """Zaadanie 5: Wysyła zawartość pliku tekstowego linia po linii."""
+        if self.connection.is_open:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    for line in f:
+                        self.send_message(line.strip())
+                print(f"plik {file_path} został wysłany.")
+            except Exception as e:
+                print(f"nie mozna wyslac pliku blad: {e}")
+
+    def receive_to_file(self, save_path):
+        """Zaadanie 5: Odbiera dane i zapisuje je do pliku aż do timeoutu."""
+        if self.connection.is_open:
+            print("oczekiwanie na plik 2 sec...")
+            with open(save_path, 'w', encoding='utf-8') as f:
+                while True:
+                    msg = self.receive_message()
+                    if msg:
+                        f.write(msg + "\n")
+                    else:
+                        # gdy None - timeout konczymy
+                        break
+            print(f"Plik zapsiany pod: {save_path}")
