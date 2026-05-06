@@ -228,10 +228,10 @@ class SerialInterface:
             return None
 
     def send_bytes(self, hex_string: str):
-        """6.2: Wysyła bajty podane w formacie hex """
         if self.connection.is_open:
             try:
                 raw = bytes.fromhex(hex_string.replace(" ", ""))
+                raw += self.active_terminator.encode('utf-8')  # dodaj terminator
                 self.connection.write(raw)
                 print(f"[6.2] Wysłano hex: {hex_string} = {raw}")
             except ValueError as e:
