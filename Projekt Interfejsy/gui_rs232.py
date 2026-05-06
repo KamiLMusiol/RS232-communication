@@ -424,8 +424,7 @@ class RS232App:
                        activebackground=PANEL, font=("Segoe UI",8)
                        ).pack(side="left", padx=4)
 
-        make_btn(bar, "Wyczyść RX", lambda: self._clear_area(self._rx_area),
-                 color=BORDER, width=11).pack(side="left", padx=4)
+        make_btn(bar, "PING", self._do_ping, color=WARNING, width=6).pack(side="left", padx=4)
 
         sf = tk.Frame(parent, bg=PANEL, pady=6); sf.pack(fill="x", padx=4)
         sf.columnconfigure(0, weight=1)
@@ -600,6 +599,22 @@ class RS232App:
             try: self.con.close()
             except: pass
         self.root.destroy()
+
+    def _do_ping(self):
+        if not self.con or not self.con.connection.is_open:
+            self.log("Brak aktywnego połączenia.", "error");
+            return
+
+        def task():
+            rtt = self.con.ping()
+            if rtt is not None:
+                self.log(f"PING OK — RTT: {rtt:.2f} ms", "success")
+                self._rx_area.after(0, lambda: self._rx_area.append(
+                    f"PING RTT: {rtt:.2f} ms", "recv"))
+            else:
+                self.log("PING — brak odpowiedzi (timeout).", "warning")
+
+        threading.Thread(target=task, daemon=True).start()
 
 
 if __name__ == "__main__":

@@ -203,3 +203,26 @@ class SerialInterface:
                         # gdy None - timeout konczymy
                         break
             print(f"Plik zapsiany pod: {save_path}")
+
+    def ping(self, message: str = "PING") -> float | None:
+        """Zadanie 5: Wysyła wiadomość i mierzy czas round trip delay."""
+        if not self.connection.is_open:
+            print("[PING] Port nie jest otwarty.")
+            return None
+
+        import time
+        full_message = message + self.active_terminator
+        self.connection.reset_input_buffer()  # czyścimy bufor przed testem
+
+        start = time.perf_counter()
+        self.connection.write(full_message.encode('utf-8'))
+        echo = self.connection.read_until(self.active_terminator.encode('utf-8'))
+        end = time.perf_counter()
+
+        if echo:
+            rtt = (end - start) * 1000  # ms
+            print(f"[PING] Echo: {repr(echo.decode('utf-8'))} | RTT: {rtt:.2f} ms")
+            return rtt
+        else:
+            print("[PING] Brak odpowiedzi (timeout).")
+            return None
