@@ -226,3 +226,13 @@ class SerialInterface:
         else:
             print("[PING] Brak odpowiedzi (timeout).")
             return None
+
+    def send_bytes(self, hex_string: str):
+        """6.2: Wysyła bajty podane w formacie hex """
+        if self.connection.is_open:
+            try:
+                raw = bytes.fromhex(hex_string.replace(" ", ""))
+                self.connection.write(raw)
+                print(f"[6.2] Wysłano hex: {hex_string} = {raw}")
+            except ValueError as e:
+                print(f"[6.2] Błędny hex: {e}")

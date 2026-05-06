@@ -421,7 +421,8 @@ class RS232App:
         self._hex_var = tk.BooleanVar()
         tk.Checkbutton(bar, text="HEX", variable=self._hex_var,
                        bg=PANEL, fg=MUTED, selectcolor="#0a0e13",
-                       activebackground=PANEL, font=("Segoe UI",8)
+                       activebackground=PANEL, font=("Segoe UI", 8),
+                       command=self._toggle_hex_mode
                        ).pack(side="left", padx=4)
 
         make_btn(bar, "PING", self._do_ping, color=WARNING, width=6).pack(side="left", padx=4)
@@ -433,10 +434,10 @@ class RS232App:
         self._send_entry.config(width=40,
                                 font=("Courier New", 10))
         self._send_entry.grid(row=0, column=0, sticky="ew", padx=(8,6), ipady=4)
-        self._send_entry.bind("<Return>", lambda e: self._send_text())
+        self._send_entry.bind("<Return>", lambda e: self._send_auto())
 
-        make_btn(sf, "WYŚLIJ ↑", self._send_text, color=SEND_CLR, width=10
-                 ).grid(row=0, column=1, padx=(0,8))
+        self._send_btn = make_btn(sf, "WYŚLIJ ↑", self._send_auto, color=SEND_CLR, width=10)
+        self._send_btn.grid(row=0, column=1, padx=(0, 8))
 
     def _send_text(self):
         if not self.con or not self.con.connection.is_open:
@@ -450,6 +451,32 @@ class RS232App:
         except Exception as e:
             self.log(f"Błąd wysyłania: {e}", "error")
 
+    def _toggle_hex_mode(self):
+        if self._hex_var.get():
+            self._send_entry.config(fg="#f0883e")
+            self._send_btn.config(text="WYŚLIJ HEX ↑")
+        else:
+            self._send_entry.config(fg=TEXT)
+            self._send_btn.config(text="WYŚLIJ ↑")
+
+    def _send_auto(self):
+        if self._hex_var.get():
+            self._send_hex()
+        else:
+            self._send_text()
+
+    def _send_hex(self):
+        if not self.con or not self.con.connection.is_open:
+            self.log("Brak aktywnego połączenia.", "error");
+            return
+        text = self._send_entry.get().strip()
+        if not text: return
+        try:
+            self.con.send_bytes(text)
+            self._rx_area.append(f"TX HEX ▶ {text}", "sent")
+            self._send_entry.delete(0, "end")
+        except Exception as e:
+            self.log(f"Błąd wysyłania hex: {e}", "error")
     def _clear_area(self, area):
         area.configure(state="normal")
         area.delete("1.0", "end")
