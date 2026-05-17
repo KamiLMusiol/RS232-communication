@@ -13,7 +13,7 @@ class SerialInterface:
         self.connection = serial.Serial() #uchwyt do obsugi rs232
         self.port_name = self.auto_select_rs232_prolific()
         self.active_terminator = ""
-        self.connection.timeout = 2  # jak po 2 sekundach nic sie nie stanie to program sie nie zawiesi
+        self.connection.timeout = 5  # jak po 5 sekundach nic sie nie stanie to program sie nie zawiesi
 
 
 
@@ -141,7 +141,7 @@ class SerialInterface:
 
         """
         if term == Terminator.CUSTOM:
-            self.active_terminator = custom[:2] #tylko 01 nie dalej jezeli nic nie bedzei zadziala jak NONE
+            self.active_terminator = custom[:2] #tylko 01 nie dalej jezeli nic nie bedzei zadziala jak NONE -
         else:
             self.active_terminator = term.value
         print(f"[1.5] Terminator ustawiony na: {repr(self.active_terminator)}")
@@ -179,6 +179,8 @@ class SerialInterface:
     # prezentacją w oknie „Nadawanie” i możliwością edycji. Po wydaniu komendy „wyślij” wysłanie bufora na łącze z dopisaniem na końcu terminator
     # Odbiór: Prezentacja odebranych znaków alfanumerycznych w oknie „Odbiór”.
 
+
+#useless
     def send_file(self, file_path):
         """Zaadanie 5: Wysyła zawartość pliku tekstowego linia po linii."""
         if self.connection.is_open:
@@ -190,6 +192,7 @@ class SerialInterface:
             except Exception as e:
                 print(f"nie mozna wyslac pliku blad: {e}")
 
+    # useless
     def receive_to_file(self, save_path):
         """Zaadanie 5: Odbiera dane i zapisuje je do pliku aż do timeoutu."""
         if self.connection.is_open:
@@ -207,7 +210,7 @@ class SerialInterface:
     def ping(self, message: str = "PING") -> float | None:
         """Zadanie 5: Wysyła wiadomość i mierzy czas round trip delay."""
         if not self.connection.is_open:
-            print("[PING] Port nie jest otwarty.")
+            print("Port nie jest otwarty.")
             return None
 
         import time
